@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Timelines</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3a86ff;
+            --secondary: #4361ee;
+            --accent: #ff006e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 10px;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 95%;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-brand i {
+            font-size: 1.6rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.8rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .nav-brand:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-brand:hover i {
+            transform: rotate(15deg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-links a:hover::before {
+            transform: translateX(0);
+        }
+
+        .nav-links a i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-links a:hover i {
+            transform: translateY(-2px);
+        }
+
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .logout-btn i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .logout-btn:hover i {
+            transform: translateX(2px);
+        }
+
+        /* Responsive Navigation */
+        @media (max-width: 992px) {
+            .navbar {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .nav-brand {
+                font-size: 1.2rem;
+            }
+
+            .nav-brand i {
+                font-size: 1.4rem;
+                padding: 0.6rem;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-links a {
+                font-size: 0.9rem;
+                padding: 0.6rem 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-brand {
+                justify-content: center;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-links a {
+                width: 100%;
+                justify-content: center;
+                padding: 0.8rem;
+            }
+
+            .nav-actions {
+                width: 100%;
+            }
+
+            .logout-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .header {
+            background: linear-gradient(120deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header h1 i {
+            margin-right: 12px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            padding: 40px;
+            height: 500px;
+            position: relative;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 0 40px 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 15px 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .footer {
+            background-color: var(--gray-light);
+            padding: 20px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .chart-container {
+                padding: 20px;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-project-diagram"></i>
+            <span>EPM System</span>
+        </div>
+        <div class="nav-links">
+            <a href="/"><i class="fas fa-home"></i> Home</a>
+            <a href="/admin/employees"><i class="fas fa-users"></i> Employees</a>
+            <a href="/admin/attendance-list"><i class="fas fa-calendar-check"></i> Attendance</a>
+            <a href="/projects"><i class="fas fa-tasks"></i> Projects</a>
+            <a href="/admin/leaves"><i class="fas fa-calendar-alt"></i> Leave Management</a>
+            <a href="/projects/timelines" class="active"><i class="fas fa-calendar-alt"></i> Project Timeline</a>
+        </div>
+        <div class="nav-actions">
+            <a href="/auth/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+</div>
+<div class="container">
+
+    <div class="header">
+        <h1><i class="fas fa-chart-gantt"></i> Project Timelines</h1>
+        <p>Visualizing project durations and schedules</p>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="timelineChart"></canvas>
+    </div>
+
+    <div class="legend" id="custom-legend">
+        <!-- Legend items will be dynamically added -->
+    </div>
+
+    <div class="footer">
+        <p>Project Management Dashboard • Updated <span th:text="${#dates.format(#dates.createNow(), 'MMM d, yyyy')}">Feb 27, 2025</span></p>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Get project data from Thymeleaf
+    var projectTimeList = /*[[${projectTimeList}]]*/ [];
+
+    // Parse the JSON string into a JavaScript object
+    projectTimeList = JSON.parse(projectTimeList);
+
+    // If no data available (for preview), use sample data
+    if (!projectTimeList.length) {
+        projectTimeList = [
+            { projectName: "Website Redesign", startDate: "2025-01-10", endDate: "2025-03-15", stage: "In Progress", progress: 65 },
+            { projectName: "Mobile App Development", startDate: "2025-02-01", endDate: "2025-05-30", stage: "Planning", progress: 25 },
+            { projectName: "Database Migration", startDate: "2025-01-05", endDate: "2025-02-10", stage: "Completed", progress: 100 },
+            { projectName: "Cloud Integration", startDate: "2025-03-01", endDate: "2025-04-25", stage: "Not Started", progress: 0 },
+        ];
+    }
+
+    // Sort projects by start date
+    projectTimeList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+    var labels = projectTimeList.map(item => item.projectName);
+    var startDates = projectTimeList.map(item => new Date(item.startDate));
+    var endDates = projectTimeList.map(item => new Date(item.endDate));
+    var progress = projectTimeList.map(item => item.progress || 0);
+
+    // Generate colors based on stage
+    function getColorsByStage(projects) {
+        const colors = [];
+        const borderColors = [];
+
+        projects.forEach(project => {
+            let bgColor, borderColor;
+
+            switch(project.status.toLowerCase()) {
+                case 'completed':
+                    bgColor = 'rgba(46, 213, 115, 0.6)';
+                    borderColor = 'rgba(46, 213, 115, 1)';
+                    break;
+                case 'active':
+                    bgColor = 'rgba(54, 162, 235, 0.6)';
+                    borderColor = 'rgba(54, 162, 235, 1)';
+                    break;
+                case 'pending':
+                    bgColor = 'rgba(255, 159, 64, 0.6)';
+                    borderColor = 'rgba(255, 159, 64, 1)';
+                    break;
+                case 'on_hold':
+                    bgColor = 'rgba(153, 102, 255, 0.6)';
+                    borderColor = 'rgba(153, 102, 255, 1)';
+                    break;
+                case 'cancelled':
+                    bgColor = 'rgba(239, 68, 68, 0.6)';
+                    borderColor = 'rgba(239, 68, 68, 1)';
+                    break;
+                default:
+                    bgColor = 'rgba(201, 203, 207, 0.6)';
+                    borderColor = 'rgba(201, 203, 207, 1)';
+            }
+
+            colors.push(bgColor);
+            borderColors.push(borderColor);
+        });
+
+        return { backgroundColor: colors, borderColor: borderColors };
+    }
+
+    const colorSet = getColorsByStage(projectTimeList);
+
+    var ctx = document.getElementById('timelineChart').getContext('2d');
+    var timelineChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Project Duration',
+                data: projectTimeList.map(item => {
+                    return (new Date(item.endDate) - new Date(item.startDate)) / (1000 * 60 * 60 * 24); // Duration in days
+                }),
+                backgroundColor: colorSet.backgroundColor,
+                borderColor: colorSet.borderColor,
+                borderWidth: 1,
+                yAxisID: 'y'
+            },
+            {
+                label: 'Progress',
+                data: progress,
+                type: 'bar',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderColor: 'rgba(0, 0, 0, 0.2)',
+                borderWidth: 1,
+                yAxisID: 'y1',
+                barPercentage: 0.3,
+                categoryPercentage: 0.8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Duration (days)'
+                    },
+                    position: 'left'
+                },
+                y1: {
+                    beginAtZero: true,
+                    max: 100,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Progress (%)'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const project = projectTimeList[context.dataIndex];
+                            const startDate = new Date(project.startDate).toLocaleDateString();
+                            const endDate = new Date(project.endDate).toLocaleDateString();
+                            if (context.dataset.label === 'Project Duration') {
+                                return [
+                                    `Stage: ${project.stage}`,
+                                    `Start: ${startDate}`,
+                                    `End: ${endDate}`,
+                                    `Duration: ${context.raw} days`
+                                ];
+                            } else {
+                                return `Progress: ${project.progress}%`;
+                            }
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            }
+        }
+    });
+
+    // Create custom legend
+    const legendContainer = document.getElementById('custom-legend');
+    const stages = [...new Set(projectTimeList.map(item => item.stage))];
+    
+    stages.forEach(stage => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        
+        const colorBox = document.createElement('div');
+        colorBox.className = 'legend-color';
+        const colors = getColorsByStage([{ stage: stage }]);
+        colorBox.style.backgroundColor = colors.backgroundColor[0];
+        colorBox.style.border = `1px solid ${colors.borderColor[0]}`;
+        
+        const label = document.createElement('span');
+        label.textContent = stage;
+        
+        legendItem.appendChild(colorBox);
+        legendItem.appendChild(label);
+        legendContainer.appendChild(legendItem);
+    });
+</script>
+</body>
+</html>

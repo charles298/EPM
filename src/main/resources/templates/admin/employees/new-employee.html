@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add/Edit Employee</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #93c5fd;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.5;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--gray-700);
+            background-color: white;
+            background-clip: padding-box;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-light);
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--gray-400);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: var(--radius);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .btn-primary {
+            color: white;
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.15s ease-in-out;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 1rem;
+            color: var(--gray-400);
+        }
+
+        .input-with-icon .form-control {
+            padding-left: 2.5rem;
+        }
+
+        .form-hint {
+            margin-top: 0.375rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .required-field::after {
+            content: "*";
+            color: var(--danger);
+            margin-left: 0.25rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+        }
+
+        .form-divider {
+            height: 1px;
+            background-color: var(--gray-200);
+            margin: 1.5rem 0;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            z-index: 10;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.05);
+            background-color: var(--primary-dark);
+        }
+
+        .floating-btn i {
+            font-size: 1.5rem;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <i class="fas fa-user-edit"></i>
+                <span th:text="${employee.employeeId == 0 ? 'Add New Employee' : 'Edit Employee'}">Add/Edit Employee</span>
+            </h1>
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/admin/employees/save}" th:object="${employee}" method="post" id="employeeForm">
+                <input type="hidden" th:field="*{employeeId}" id="employeeId">
+
+                <div class="form-group">
+                    <label for="firstName" class="required-field">First Name</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" class="form-control" id="firstName" th:field="*{firstName}"
+                               placeholder="Enter first name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName" class="required-field">Last Name</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" class="form-control" id="lastName" th:field="*{lastName}"
+                               placeholder="Enter last name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="required-field">Email</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" class="form-control" id="email" th:field="*{email}"
+                               placeholder="Enter email" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="department" class="required-field">Department</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-building input-icon"></i>
+                        <select class="form-control" id="department" th:field="*{department}" required>
+                            <option value="">Select Department</option>
+                            <option value="IT">IT</option>
+                            <option value="HR">HR</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Operations">Operations</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="username" class="required-field">Username</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" class="form-control" id="username" th:field="*{username}"
+                               placeholder="Choose a username" required>
+                    </div>
+                    <div class="form-hint">This will be used for login.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="required-field">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" class="form-control" id="password" th:field="*{password}"
+                               placeholder="Choose a password" required>
+                    </div>
+                    <div class="form-hint">Use a strong password with at least 8 characters.</div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <div class="form-footer">
+                    <a href="/admin/employees" class="back-link">
+                        <i class="fas fa-arrow-left"></i> Back to Employees
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Employee
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('employeeForm');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Basic validation
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            let isValid = true;
+
+            if (!firstName) {
+                isValid = false;
+                highlightError('firstName');
+            }
+
+            if (!lastName) {
+                isValid = false;
+                highlightError('lastName');
+            }
+
+            if (!email || !isValidEmail(email)) {
+                isValid = false;
+                highlightError('email');
+            }
+
+            if (isValid) {
+                form.submit();
+            }
+        });
+
+        // Add clear error on focus
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.borderColor = 'var(--primary-light)';
+                this.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.25)';
+            });
+        });
+
+        function highlightError(fieldId) {
+            const field = document.getElementById(fieldId);
+            field.style.borderColor = 'var(--danger)';
+            field.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.25)';
+        }
+
+        function isValidEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(email);
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Project</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4f46e5',
+            secondary: '#0ea5e9',
+            accent: '#8b5cf6',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+          }
+        }
+      }
+    }
+  </script>
+  <script>
+    function validateDates() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        alert('End date must be after the start date.');
+        document.getElementById('endDate').value = '';
+      }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-blue-100 min-h-screen">
+<div class="container mx-auto p-8">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <h1 class="text-3xl font-bold mb-4 text-primary bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Edit Project</h1>
+      <p class="text-gray-600 mb-2">Update the details below to edit the project</p>
+      <div class="border-b border-gray-200 mb-6"></div>
+
+      <a href="/projects" class="inline-flex items-center text-primary hover:text-secondary transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        Back to Project List
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div class="p-4 bg-gradient-to-r from-primary to-secondary text-white">
+        <h2 class="text-xl font-semibold">Project Details</h2>
+      </div>
+
+      <form th:action="@{/projects/update/{id}(id=${project.projectId})}" th:object="${project}" method="POST" class="p-6">
+        <div class="space-y-6">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+            <input type="text" name="name" id="name" th:field="*{name}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Enter project name">
+          </div>
+
+          <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Project Status</label>
+            <div class="relative">
+              <select name="status" id="status" th:field="*{status}" class="w-full p-3 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-primary focus:border-primary bg-white transition-colors">
+                <option value="PENDING" th:selected="${project.status.name() == 'PENDING'}">Pending</option>
+                <option value="ACTIVE" th:selected="${project.status.name() == 'ACTIVE'}">Active</option>
+                <option value="COMPLETED" th:selected="${project.status.name() == 'COMPLETED'}">Completed</option>
+                <option value="ON_HOLD" th:selected="${project.status.name() == 'ON_HOLD'}">On Hold</option>
+                <option value="CANCELLED" th:selected="${project.status.name() == 'CANCELLED'}">Cancelled</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="description" id="description" th:field="*{description}" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Describe your project"></textarea>
+          </div>
+
+          <div>
+            <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <input type="date" name="startDate" id="startDate" th:field="*{startDate}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors" onchange="validateDates()">
+          </div>
+
+          <div>
+            <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <input type="date" name="endDate" id="endDate" th:field="*{endDate}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors" onchange="validateDates()">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Assign Team Members</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg">
+              <div th:each="employee : ${allEmployees}" class="flex items-center space-x-3">
+                <div class="flex items-center">
+                  <input type="checkbox" 
+                         name="employees" 
+                         th:value="${employee.employeeId}" 
+                         th:id="'employee-' + ${employee.employeeId}"
+                         th:checked="${project.employees != null && project.employees.contains(employee)}"
+                         class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                  <label th:for="'employee-' + ${employee.employeeId}" 
+                         th:text="${employee.firstName + ' ' + employee.lastName}" 
+                         class="ml-2 block text-sm text-gray-700">John Doe</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="progress" class="required-field">Progress (%)</label>
+            <input type="number" class="form-control" id="progress" name="progress" 
+                   th:value="${project.progress}" min="0" max="100" required>
+          </div>
+        </div>
+
+        <div class="mt-8 flex space-x-4">
+          <button type="button" onclick="window.location.href='/projects'" class="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
+            Cancel
+          </button>
+          <button type="submit" class="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-lg hover:from-primary hover:to-primary focus:outline-none focus:ring-2 focus:ring-primary shadow-md hover:shadow-lg transition-all">
+            Save Project
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>
